@@ -20,7 +20,7 @@
     "build": "vite build && vue-tsc --emitDeclarationOnly",
     "preview": "vite preview",
     "zip": "tar -zcvf osd-custom-viewer.tar.gz dist",
-    "publish": "npm run build && npm version minor && npm publish --access=public"
+    "deploy": "npm version minor && npm publish --access=public"
   },
   "dependencies": {
     "openseadragon": "^4.0.0",
