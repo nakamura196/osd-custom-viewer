@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
-import OpenSeadragon, { Overlay } from "openseadragon";
+import { onMounted, watch } from "vue";
+import OpenSeadragon from "openseadragon";
 
-// const title = ref<string>("");
-// const attribution = ref<string>("");
-
-const viewer = ref<any>();
-
-const currentManifest = ref<string>("");
+let viewer: any = null;
+let currentManifest = "";
+let currentRegionString = "";
+let canvases: any[] = [];
+let overlays: any = {};
 
 const props = withDefaults(
   defineProps<{
@@ -38,9 +37,6 @@ onMounted(async () => {
   await init();
 });
 
-let canvases: any[] = [];
-let overlays: any = {};
-
 const init = async () => {
   const manifest = props.manifest;
 
@@ -48,22 +44,19 @@ const init = async () => {
     return;
   }
 
-  currentManifest.value = manifest;
+  currentManifest = manifest;
 
   const tileSources: string[] = [];
 
   const res = await fetch(props.manifest);
   const data: any = await res.json();
 
-  // title.value = data.label;
-  // attribution.value = data.attribution;
-
   canvases = data.sequences[0].canvases;
   for (const canvas of canvases) {
     tileSources.push(canvas.images[0].resource.service["@id"] + "/info.json");
   }
 
-  viewer.value = OpenSeadragon({
+  viewer = OpenSeadragon({
     sequenceMode: true,
     id: "openseadragon",
     prefixUrl: props.prefixUrl,
@@ -76,16 +69,19 @@ const init = async () => {
   //移動
   move();
 
-  viewer.value.addHandler("page", function (event: any) {
-    emit("page", event.page + 1);
+  viewer.addHandler("page", function (event: any) {
+    emit("updated", event.page + 1);
   });
 };
 
+//オーバーレイを作成する
 const createOverlays = () => {
   overlays = {};
 
   // canvas_id毎のxywhsを作成する
   const regionsByCanvas: any = {};
+
+  currentRegionString = props.regions.join(",");
 
   for (const region of props.regions) {
     const spl = region.split("#xywh=");
@@ -139,7 +135,7 @@ const createOverlays = () => {
 
 const move = () => {
   const page = props.page;
-  viewer.value.goToPage(page - 1);
+  viewer.goToPage(page - 1);
 
   //当該ページのオーバーレイを追加
   overlay();
@@ -148,50 +144,46 @@ const move = () => {
 const overlay = () => {
   if (overlays[props.page]) {
     for (const overlay of overlays[props.page]) {
-      viewer.value.addOverlay(overlay);
+      viewer.addOverlay(overlay);
     }
   }
 };
 
+// propsが更新されたら
 watch(
   props,
   (value) => {
-    if (!viewer.value) {
+    if (!viewer) {
       return;
     }
 
     //マニフェストが変わったら再初期化
-    if (value.manifest !== currentManifest.value) {
-      viewer.value.destroy();
+    if (value.manifest !== currentManifest) {
+      //destory
+      viewer.destroy();
       init();
       return;
     }
 
-    move();
+    if(currentRegionString !== value.regions.join(",")){
+      //オーバーレイを作成する
+      createOverlays();
+    }
 
-    // overlay()
+    move();
   },
   { deep: true }
 );
 </script>
 
 <template>
-  <div>
-    <div class="highlight">
-      <ul>
-        <li>{{ manifest }}</li>
-        <li>{{ page }}</li>
-        <li>{{regions}}</li>
-      </ul>
-    </div>
-    <div
-      id="openseadragon"
-      :style="`height: ${height}px; width: ${width}; background-color: ${backgroundColor};`"
-    ></div>
-  </div>
+  <div
+    id="openseadragon"
+    :style="`height: ${height}px; width: ${width}; background-color: ${backgroundColor};`"
+  ></div>
 </template>
-<style>
-.highlight {
+<style scoped>
+:deep(.highlight) {
   opacity: 0.3;
   background-color: #e9dc51;
 }

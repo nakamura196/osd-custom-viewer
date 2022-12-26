@@ -77,7 +77,7 @@ const ex03 = () => {
 
   <OsdCustomViewer
     v-if="manifest"
-    @page="updatePage"
+    @updated="updatePage"
     :manifest="manifest"
     :page="page"
     :regions="regions"
