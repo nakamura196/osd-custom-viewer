@@ -1,28 +1,28 @@
+import { resolve } from 'path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import * as path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
-
-  
-  // >>> start
   build: {
     lib: {
-      entry: path.resolve(__dirname, "src/index.ts"),
-      name: "my-vue-libs",
-      fileName: (format) => `my-component-${format}.js`
+      entry: resolve(__dirname, 'lib/main.ts'),
+      name: 'VueComponentOsd',
+      // the proper extensions will be added
+      fileName: 'vue-component-npm-example'
     },
     rollupOptions: {
-      external: "vue",
+      // make sure to externalize deps that shouldn't be bundled
+      // into your library
+      external: ['vue'],
       output: {
+        // Provide global variables to use in the UMD build
+        // for externalized deps
         globals: {
-          vue: "Vue",
+          vue: 'Vue'
         }
       }
     }
   }
-  // <<< end
-  
 })

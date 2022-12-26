@@ -1,21 +1,37 @@
 <script setup lang="ts">
+import Osd from '../lib/Osd.vue'
+import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+const page = ref<number>(1)
+const manifest = ref<string>("")
+const route = useRoute()
+const updatePage = (value: number) => {
+  page.value = value
+}
+onMounted(() => {
+  manifest.value = route && route.query.manifest ? String(route.query.manifest) : "https://www.dl.ndl.go.jp/api/iiif/3437686/manifest.json"
+})
 
+const move = (value: number) => {
+  page.value += value
+}
 </script>
 
 <template>
-  aaa
-</template>
+  <p>Page: {{ page }}</p>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>
+  <button @click="move(1)" style="margin: 8px;">+</button>
+  <button @click="move(-1)" style="margin: 8px;">-</button>
+
+  <Osd
+    v-if="manifest"
+    @page="updatePage"
+    :manifest="manifest"
+    :page="page"
+  />
+  <p>
+    <ul>
+      <li>This demo application processes manifest files for which the IIIF Presentation API v.2 and Image API are enabled.</li>
+      <li>本デモアプリケーションでは、IIIF Presentation API v.2 および Image API が有効なマニフェストファイルが処理対象です。</li>
+    </ul></p>
+</template>
