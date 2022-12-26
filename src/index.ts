@@ -1,2 +1,2 @@
-import MyButton from "./components/MyButton.vue";
+import MyButton from "./components/MyComponent.vue";
 export { MyButton }

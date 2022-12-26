@@ -1,5 +1,8 @@
 {
-  "name": "vite-project",
+  "name": "@nakamura196/test-pkj",
+  "main": "dist/my-component-es.js",
+  "unpkg": "./dist/my-component-umd.js",
+  "jsdelivr": "./dist/my-component-umd.js",
   "private": true,
   "version": "0.6.0",
   "type": "module",
