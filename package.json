@@ -1,8 +1,13 @@
 {
   "name": "@nakamura196/osd-custom-viewer",
-  "version": "2.14.0",
+  "version": "2.15.0",
   "description": "This is a custom openseadragon viewer.",
-  "keywords": ["iiif", "tei", "openseadragon", "vue3"],
+  "keywords": [
+    "iiif",
+    "tei",
+    "openseadragon",
+    "vue3"
+  ],
   "bugs": "https://github.com/nakamura196/osd-custom-viewer/issues",
   "repository": "github:nakamura196/osd-custom-viewer",
   "author": {
