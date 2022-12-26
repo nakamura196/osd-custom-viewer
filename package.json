@@ -1,6 +1,16 @@
 {
   "name": "@nakamura196/osd-custom-viewer",
   "version": "2.14.0",
+  "description": "This is a custom openseadragon viewer.",
+  "keywords": ["iiif", "tei", "openseadragon", "vue3"],
+  "bugs": "https://github.com/nakamura196/osd-custom-viewer/issues",
+  "repository": "github:nakamura196/osd-custom-viewer",
+  "author": {
+    "name": "Satoru Nakamura",
+    "email": "na.kamura.1263@gmail.com",
+    "url": "https://researchmap.jp/nakamura.satoru?lang=en"
+  },
+  "license": "MIT",
   "type": "module",
   "files": [
     "dist"
