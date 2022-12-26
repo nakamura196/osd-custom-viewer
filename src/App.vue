@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Osd from '../lib/Osd.vue'
+import OsdCustomViewer from '../lib/OsdCustomViewer.vue'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 const page = ref<number>(1)
@@ -23,7 +23,7 @@ const move = (value: number) => {
   <button @click="move(1)" style="margin: 8px;">+</button>
   <button @click="move(-1)" style="margin: 8px;">-</button>
 
-  <Osd
+  <OsdCustomViewer
     v-if="manifest"
     @page="updatePage"
     :manifest="manifest"

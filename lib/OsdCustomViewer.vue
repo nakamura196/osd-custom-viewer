@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
 import OpenSeadragon from "openseadragon";
-import axios from "axios";
 
 const title = ref<string>("");
 const attribution = ref<string>("");
@@ -40,7 +39,8 @@ onMounted(async () => {
 
   const tileSources: string[] = [];
 
-  const { data } = await axios.get(props.manifest);
+  const res = await fetch(props.manifest);
+  const data: any = await res.json()
   title.value = data.label;
   attribution.value = data.attribution;
 
