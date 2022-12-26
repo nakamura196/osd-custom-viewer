@@ -176,10 +176,19 @@ watch(
 </script>
 
 <template>
-  <div
-    id="openseadragon"
-    :style="`height: ${height}px; width: ${width}; background-color: ${backgroundColor};`"
-  ></div>
+  <div>
+    <div class="highlight">
+      <ul>
+        <li>{{ manifest }}</li>
+        <li>{{ page }}</li>
+        <li>{{regions}}</li>
+      </ul>
+    </div>
+    <div
+      id="openseadragon"
+      :style="`height: ${height}px; width: ${width}; background-color: ${backgroundColor};`"
+    ></div>
+  </div>
 </template>
 <style>
 .highlight {
