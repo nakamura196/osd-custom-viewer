@@ -1,6 +1,6 @@
 {
   "name": "@nakamura196/osd-custom-viewer",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "type": "module",
   "files": [
     "dist"
