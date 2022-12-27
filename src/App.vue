@@ -6,8 +6,9 @@ const page = ref<number>(1);
 const manifest = ref<string>("");
 const canvas = ref<string>("");
 const route = useRoute();
-const updatePage = (value: number) => {
-  page.value = value;
+const updatePage = (value: any) => {
+  page.value = value.page;
+  canvas.value = value.canvas
 };
 onMounted(() => {
   manifest.value =
@@ -81,6 +82,8 @@ const ex04 = () => {
     <h3>ページネーション</h3>
 
     <p>Page: {{ page }}</p>
+
+    <p>Canvas: {{ canvas }}</p>
 
     <h4>コンポーネントの外からページネーション</h4>
 

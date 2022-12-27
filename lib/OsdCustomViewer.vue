@@ -43,7 +43,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (action: string, page: number): void;
+  (action: string, pageInfo: any): void;
 }>();
 
 onMounted(async () => {
@@ -67,11 +67,6 @@ const init = async () => {
   canvases = data.sequences[0].canvases;
   for (const canvas_ of canvases) {
     tileSources.push(canvas_.images[0].resource.service["@id"] + "/info.json");
-    /*
-    if(canvas_["@id"] === props.canvas){
-      props.page = tileSources.length;
-    }
-    */
   }
 
   viewer = OpenSeadragon({
@@ -88,7 +83,10 @@ const init = async () => {
   move();
 
   viewer.addHandler("page", function (event: any) {
-    emit("updated", event.page + 1);
+    emit("updated", {
+      page: event.page + 1,
+      canvas: canvases[event.page]["@id"],
+    });
   });
 };
 
@@ -162,8 +160,6 @@ const move = () => {
     }
     currentCanvas = props.canvas;
   }
-
-  console.log(page, props.canvas, currentCanvas)
 
   viewer.goToPage(page - 1);
 
