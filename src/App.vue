@@ -4,6 +4,7 @@ import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 const page = ref<number>(1);
 const manifest = ref<string>("");
+const canvas = ref<string>("");
 const route = useRoute();
 const updatePage = (value: number) => {
   page.value = value;
@@ -22,12 +23,14 @@ const move = (value: number) => {
 const regions = ref<string[]>([]);
 
 const ex01 = () => {
+  canvas.value = ""
   regions.value = [];
   manifest.value = "https://www.dl.ndl.go.jp/api/iiif/3437686/manifest.json";
   page.value = 1;
 };
 
 const ex02 = () => {
+  canvas.value = ""
   regions.value = [
     "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=2028,644,1452,1992",
     "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=544,620,1452,2000",
@@ -38,6 +41,7 @@ const ex02 = () => {
 };
 
 const ex03 = () => {
+  canvas.value = ""
   regions.value = [
     "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=2028,644,1452,1992",
     "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=544,620,1452,2000",
@@ -46,6 +50,12 @@ const ex03 = () => {
   ];
   manifest.value = "https://www.dl.ndl.go.jp/api/iiif/2567061/manifest.json";
   page.value = 91;
+};
+
+const ex04 = () => {
+  regions.value = [];
+  canvas.value = "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69";
+  manifest.value = "https://www.dl.ndl.go.jp/api/iiif/2567061/manifest.json";
 };
 </script>
 
@@ -62,6 +72,9 @@ const ex03 = () => {
     <button style="margin: 4px" @click="ex03">
       他のページをハイライト（絵入源氏物語）
     </button>
+    <button style="margin: 4px" @click="ex04">
+      canvas_idで指定（絵入源氏物語）
+    </button>
   </div>
 
   <div style="margin-bottom: 8px">
@@ -77,6 +90,7 @@ const ex03 = () => {
 
   <OsdCustomViewer
     v-if="manifest"
+    :canvas="canvas"
     @updated="updatePage"
     :manifest="manifest"
     :page="page"

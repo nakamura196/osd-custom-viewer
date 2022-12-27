@@ -24,6 +24,7 @@ const props = withDefaults(
     width?: string;
     manifest?: string;
     page?: number;
+    canvas?: string;
     backgroundColor?: string;
     prefixUrl?: string;
     regions?: any;
@@ -33,6 +34,7 @@ const props = withDefaults(
     width: "100%",
     manifest: "",
     page: 1,
+    canvas: "",
     backgroundColor: "black",
     prefixUrl: "./images/",
     regions: [],
@@ -62,8 +64,12 @@ const init = async () => {
   const data: any = await res.json();
 
   canvases = data.sequences[0].canvases;
-  for (const canvas of canvases) {
-    tileSources.push(canvas.images[0].resource.service["@id"] + "/info.json");
+  for (const canvas_ of canvases) {
+    tileSources.push(canvas_.images[0].resource.service["@id"] + "/info.json");
+
+    if(canvas_["@id"] === props.canvas){
+      props.page = tileSources.length;
+    }
   }
 
   viewer = OpenSeadragon({
