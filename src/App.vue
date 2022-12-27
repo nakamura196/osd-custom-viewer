@@ -54,8 +54,8 @@ const ex03 = () => {
 
 const ex04 = () => {
   regions.value = [];
-  canvas.value = "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69";
-  manifest.value = "https://www.dl.ndl.go.jp/api/iiif/2567061/manifest.json";
+  canvas.value = "https://dl.ndl.go.jp/api/iiif/3437686/canvas/6";
+  manifest.value = "https://www.dl.ndl.go.jp/api/iiif/3437686/manifest.json";
 };
 </script>
 
@@ -73,7 +73,7 @@ const ex04 = () => {
       他のページをハイライト（絵入源氏物語）
     </button>
     <button style="margin: 4px" @click="ex04">
-      canvas_idで指定（絵入源氏物語）
+      canvas_idで指定（校異源氏物語）
     </button>
   </div>
 

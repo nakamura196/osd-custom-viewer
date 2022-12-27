@@ -2,8 +2,11 @@
 import { onMounted, watch } from "vue";
 import OpenSeadragon from "openseadragon";
 
+console.log("aaa");
+
 let viewer: any = null;
 let currentManifest = "";
+let currentCanvas = "";
 let currentRegionString = "";
 let canvases: any[] = [];
 let overlays: any = {};
@@ -66,10 +69,11 @@ const init = async () => {
   canvases = data.sequences[0].canvases;
   for (const canvas_ of canvases) {
     tileSources.push(canvas_.images[0].resource.service["@id"] + "/info.json");
-
+    /*
     if(canvas_["@id"] === props.canvas){
       props.page = tileSources.length;
     }
+    */
   }
 
   viewer = OpenSeadragon({
@@ -150,7 +154,16 @@ const createOverlays = () => {
 };
 
 const move = () => {
-  const page = props.page;
+  let page = props.page;
+  if (currentCanvas !== props.canvas) {
+    for (const canvas of canvases) {
+      if (canvas["@id"] === props.canvas) {
+        page = canvases.indexOf(canvas) + 1;
+        break;
+      }
+    }
+    currentCanvas = props.canvas;
+  }
   viewer.goToPage(page - 1);
 
   //当該ページのオーバーレイを追加
