@@ -8,6 +8,16 @@ let currentRegionString = "";
 let canvases: any[] = [];
 let overlays: any = {};
 
+const createUuid = () => {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (a) {
+    let r = (new Date().getTime() + Math.random() * 16) % 16 | 0,
+      v = a == "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
+const uuid = createUuid();
+
 const props = withDefaults(
   defineProps<{
     height?: number;
@@ -58,7 +68,7 @@ const init = async () => {
 
   viewer = OpenSeadragon({
     sequenceMode: true,
-    id: "openseadragon",
+    id: "osd-" + uuid,
     prefixUrl: props.prefixUrl,
     tileSources,
   });
@@ -165,7 +175,7 @@ watch(
       return;
     }
 
-    if(currentRegionString !== value.regions.join(",")){
+    if (currentRegionString !== value.regions.join(",")) {
       //オーバーレイを作成する
       createOverlays();
     }
@@ -178,7 +188,7 @@ watch(
 
 <template>
   <div
-    id="openseadragon"
+    :id="`osd-${uuid}`"
     :style="`height: ${height}px; width: ${width}; background-color: ${backgroundColor};`"
   ></div>
 </template>
