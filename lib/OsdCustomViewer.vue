@@ -2,8 +2,6 @@
 import { onMounted, watch } from "vue";
 import OpenSeadragon from "openseadragon";
 
-console.log("aaa");
-
 let viewer: any = null;
 let currentManifest = "";
 let currentCanvas = "";
@@ -164,6 +162,9 @@ const move = () => {
     }
     currentCanvas = props.canvas;
   }
+
+  console.log(page, props.canvas, currentCanvas)
+
   viewer.goToPage(page - 1);
 
   //当該ページのオーバーレイを追加
