@@ -7,14 +7,15 @@ const manifest = ref<string>("");
 const canvas = ref<string>("");
 const route = useRoute();
 const region = ref<string>("");
-const viewer = ref<any>(null);
+// const viewer = ref<any>(null);
+const hover = ref<string>("");
 
 const updatePage = (value: any) => {
   page.value = value.page;
   canvas.value = value.canvas;
 };
 
-const updateSelected = (value: any) => {
+const updatedSeletecd = (value: any) => {
   // console.log(value.region)
   region.value = value.region;
 };
@@ -88,9 +89,23 @@ const region1 = () => {
     "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=2028,644,1452,1992";
 };
 
+const hover1 = () => {
+  hover.value =
+    "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=2028,644,1452,1992";
+};
+
+const mouseLeaveAction = () => {
+  hover.value = "";
+};
+
 const region2 = () => {
   region.value =
     "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=544,620,1452,2000";
+};
+
+const hover2 = () => {
+  hover.value =
+  "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=544,620,1452,2000";
 };
 </script>
 
@@ -132,6 +147,8 @@ const region2 = () => {
           : ''
       "
       @click="region1"
+      v-on:mouseover="hover1"
+      v-on:mouseleave="mouseLeaveAction"
     >
       region1
     </button>
@@ -145,6 +162,7 @@ const region2 = () => {
           : ''
       "
       @click="region2"
+      @hover="hover2"
     >
       region2
     </button>
@@ -169,14 +187,16 @@ const region2 = () => {
     v-if="manifest"
     :canvas="canvas"
     @updated="updatePage"
-    @updatedSeletecd="updateSelected"
+    @updatedSeletecd="updatedSeletecd"
     :manifest="manifest"
     :page="page"
     :regions="regions"
     :showAll="isShowAll"
-    _region="https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=2028,644,1452,1992"
     :region="region"
+    :hover="hover"
   />
+
+  {{ hover }}
 
   <div>
     <ul>

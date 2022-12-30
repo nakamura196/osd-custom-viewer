@@ -12,6 +12,7 @@ let canvases: any[] = [];
 let overlays: any = {};
 let seletedRegion: string = "";
 // let currentShowAll: any = null;
+let hover: string = ""
 
 const createUuid = () => {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (a) {
@@ -35,6 +36,7 @@ const props = withDefaults(
     regions?: any;
     showAll?: boolean;
     region?: string;
+    hover?: string;
   }>(),
   {
     height: 600,
@@ -47,6 +49,7 @@ const props = withDefaults(
     regions: [],
     showAll: false,
     region: "",
+    hover: "",
   }
 );
 
@@ -154,7 +157,7 @@ const createOverlays = () => {
 const move = () => {
   let page = props.page;
 
-  updateOverlay(page);
+  // updateOverlay(page);
 
   viewer.goToPage(page - 1);
 
@@ -169,10 +172,10 @@ const updateOverlay = (page: number) => {
 
       new OpenSeadragon.MouseTracker({
         element: overlay.id,
-        clickHandler: function (e) {
+        clickHandler: function (e: any) {
           if (e) {
             const id = e.originalTarget.id;
-            var target = document.getElementById(id);
+            var target: any = document.getElementById(id);
 
             // すべての要素からselectedを削除
             const e2 = document.getElementsByClassName("selected");
@@ -198,10 +201,16 @@ const updateOverlay = (page: number) => {
 const addSelectOverlay = () => {
   for (const page in overlays) {
     for (const overlay of overlays[page]) {
-      if (seletedRegion && seletedRegion === overlay.id) {
+      if (seletedRegion === overlay.id) {
         overlay.className += " selected";
+      } else  {
+        overlay.className = overlay.className.split(" selected").join(""); //複数の場合あり
+      }
+
+      if (props.hover === overlay.id) {
+        overlay.className += " hover";
       } else {
-        overlay.className = overlay.className.replace(" selected", "");
+        overlay.className = overlay.className.replace(" hover", "");
       }
     }
   }
@@ -211,10 +220,11 @@ const showOverlay = () => {
   for (const page in overlays) {
     for (const overlay of overlays[page]) {
       overlay.className = "base highlight";
-
+      /*
       if (seletedRegion && seletedRegion === overlay.id) {
         overlay.className = "base highlight selected";
       }
+      */
     }
   }
 };
@@ -223,10 +233,11 @@ const hideOverlay = () => {
   for (const page in overlays) {
     for (const overlay of overlays[page]) {
       overlay.className = "base";
-
+      /*
       if (seletedRegion && seletedRegion === overlay.id) {
         overlay.className = "base highlight selected";
       }
+      */
     }
   }
 };
@@ -258,11 +269,17 @@ watch(
       }
 
       addSelectOverlay();
-      updateOverlay(currentProps.page);
 
-      move();
+      if (currentProps.page !== value.page) {
+        console.log("A1", "move");
+        move();
+        console.log("A1", "end");
+      } else {
+        updateOverlay(currentProps.page);
+      }
     } else {
       // あとで整理
+      // regionに変化があったら
       if (
         !currentProps.regions ||
         currentProps.regions.join(",") !== value.regions.join(",")
@@ -280,10 +297,15 @@ watch(
         addSelectOverlay();
         updateOverlay(currentProps.page);
 
-        move();
+        if (currentProps.page !== value.page) {
+          console.log("A2", "move");
+          move();
+        }
       } else {
+
+        // visibleに変化があったら
         if (currentProps.showAll !== value.showAll) {
-          console.log("A", "showOrHideOverlays");
+          console.log("A3", "showOrHideOverlays");
           if (value.showAll) {
             showOverlay();
           } else {
@@ -294,23 +316,31 @@ watch(
 
           //ページが移動しない場合, または regionに変化があった場合
           if (currentProps.page === value.page) {
-            console.log("A", "updateOverlay");
+            console.log("A3", "updateOverlay");
             updateOverlay(currentProps.page);
           }
         }
 
         // regionに更新があれば //要検討
         if (props.region && props.region !== currentProps.region) {
-          console.log("A", "addSelectOverlay");
+          // console.log("regionが変更されました。")
+          console.log("A3", "addSelectOverlay");
           addSelectOverlay();
           updateOverlay(currentProps.page);
         }
 
         if (currentProps.page !== value.page) {
-          console.log("A", "move");
+          console.log("A3", "move");
           move();
         }
       }
+    }
+
+    if(currentProps.hover !== value.hover) {
+      console.log("A4", "hover")
+      // hover = value.hover;
+      addSelectOverlay();
+      updateOverlay(currentProps.page);
     }
 
     currentProps = Object.assign({}, value);
@@ -327,14 +357,18 @@ watch(
 </template>
 <style scoped>
 :deep(.highlight) {
-  outline: thick solid #03a9f4;
+  outline: solid #03a9f4;
 }
 
 :deep(.selected) {
-  outline: thick solid #ffeb3b !important;
+  outline: solid #ffeb3b !important;
+}
+
+:deep(.hover) {
+  outline: solid #9c27b0;
 }
 
 :deep(.base:hover, .base:focus) {
-  outline: thick solid #9c27b0;
+  outline: solid #9c27b0;
 }
 </style>
