@@ -3,16 +3,11 @@ import { onMounted, watch } from "vue";
 import OpenSeadragon from "openseadragon";
 
 let viewer: any = null;
-// let currentManifest = "";
-// let currentCanvas = "";
 let currentProps: any = {};
-// let currentPage = 1;
-// let currentRegion = ""; // String = "";
+let page = 1;
 let canvases: any[] = [];
 let overlays: any = {};
 let seletedRegion: string = "";
-// let currentShowAll: any = null;
-let hover: string = ""
 
 const createUuid = () => {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (a) {
@@ -59,7 +54,7 @@ const emit = defineEmits<{
 
 // init
 const init = async () => {
-  const manifest = props.manifest;
+  // const manifest = props.manifest;
 
   const tileSources: string[] = [];
 
@@ -154,14 +149,24 @@ const createOverlays = () => {
   // currentRegion = props.regions;
 };
 
+// 外部からのページネーション
 const move = () => {
-  let page = props.page;
 
-  // updateOverlay(page);
+  if(props.canvas) {
+    // canvasが指定されていた場合、pageを設定する
+    for (let i = 0; i < canvases.length; i++) {
+      if (canvases[i]["@id"] === props.canvas) {
+        page = i + 1;
+        break;
+      }
+    }
+  }
+
+  if(props.page) {
+    page = props.page;
+  }
 
   viewer.goToPage(page - 1);
-
-  // currentPage = props.page;
 };
 
 const updateOverlay = (page: number) => {
@@ -270,10 +275,8 @@ watch(
 
       addSelectOverlay();
 
-      if (currentProps.page !== value.page) {
-        console.log("A1", "move");
+      if (currentProps.page !== value.page || currentProps.canvas !== value.canvas) {
         move();
-        console.log("A1", "end");
       } else {
         updateOverlay(currentProps.page);
       }
@@ -285,7 +288,6 @@ watch(
         currentProps.regions.join(",") !== value.regions.join(",")
       ) {
         //オーバーレイを作成する
-        console.log("A", "createOverlays");
         createOverlays();
 
         if (value.showAll) {
@@ -297,15 +299,13 @@ watch(
         addSelectOverlay();
         updateOverlay(currentProps.page);
 
-        if (currentProps.page !== value.page) {
-          console.log("A2", "move");
+        if (currentProps.page !== value.page || currentProps.canvas !== value.canvas) {
           move();
         }
       } else {
 
         // visibleに変化があったら
         if (currentProps.showAll !== value.showAll) {
-          console.log("A3", "showOrHideOverlays");
           if (value.showAll) {
             showOverlay();
           } else {
@@ -316,28 +316,23 @@ watch(
 
           //ページが移動しない場合, または regionに変化があった場合
           if (currentProps.page === value.page) {
-            console.log("A3", "updateOverlay");
             updateOverlay(currentProps.page);
           }
         }
 
         // regionに更新があれば //要検討
         if (props.region && props.region !== currentProps.region) {
-          // console.log("regionが変更されました。")
-          console.log("A3", "addSelectOverlay");
           addSelectOverlay();
           updateOverlay(currentProps.page);
         }
 
-        if (currentProps.page !== value.page) {
-          console.log("A3", "move");
+        if (currentProps.page !== value.page || currentProps.canvas !== value.canvas) {
           move();
         }
       }
     }
 
     if(currentProps.hover !== value.hover) {
-      console.log("A4", "hover")
       // hover = value.hover;
       addSelectOverlay();
       updateOverlay(currentProps.page);
