@@ -32,6 +32,9 @@ onMounted(() => {
 
 const move2 = (value: number) => {
   page.value += value;
+
+  // canvasを空にする。要検討
+  canvas.value = ""
 };
 
 const regions = ref<string[]>([]);
@@ -71,6 +74,12 @@ const ex03 = () => {
 const ex04 = () => {
   regions.value = [];
   canvas.value = "https://dl.ndl.go.jp/api/iiif/3437686/canvas/6";
+  manifest.value = "https://www.dl.ndl.go.jp/api/iiif/3437686/manifest.json";
+};
+
+const ex05 = () => {
+  regions.value = [];
+  canvas.value = "https://dl.ndl.go.jp/api/iiif/3437686/canvas/7";
   manifest.value = "https://www.dl.ndl.go.jp/api/iiif/3437686/manifest.json";
 };
 
@@ -123,6 +132,10 @@ const hover2 = () => {
       他のページをハイライト（絵入源氏物語）
     </button>
     <button style="margin: 4px" @click="ex04">
+      canvas_idで指定（校異源氏物語）
+    </button>
+
+    <button style="margin: 4px" @click="ex05">
       canvas_idで指定（校異源氏物語）
     </button>
   </div>

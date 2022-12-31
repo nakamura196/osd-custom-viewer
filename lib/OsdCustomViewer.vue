@@ -151,22 +151,16 @@ const createOverlays = () => {
 
 // 外部からのページネーション
 const move = () => {
+  
+  
 
-  if(props.canvas) {
-    // canvasが指定されていた場合、pageを設定する
-    for (let i = 0; i < canvases.length; i++) {
-      if (canvases[i]["@id"] === props.canvas) {
-        page = i + 1;
-        break;
-      }
-    }
-  }
-
-  if(props.page) {
+  /*
+  if (props.page) {
     page = props.page;
   }
+  */
 
-  viewer.goToPage(page - 1);
+  viewer.goToPage(/*page*/ page - 1);
 };
 
 const updateOverlay = (page: number) => {
@@ -247,6 +241,7 @@ const hideOverlay = () => {
   }
 };
 
+/*
 // propsが更新されたら
 watch(
   props,
@@ -304,6 +299,12 @@ watch(
         }
       } else {
 
+        console.log("ends")
+
+        console.log(1, JSON.stringify(currentProps))
+
+        console.log(2, JSON.stringify(value))
+
         // visibleに変化があったら
         if (currentProps.showAll !== value.showAll) {
           if (value.showAll) {
@@ -339,6 +340,72 @@ watch(
     }
 
     currentProps = Object.assign({}, value);
+  },
+  { deep: true, immediate: true }
+);
+*/
+
+// propsが更新されたら
+watch(
+  props,
+  async (value) => {
+
+    //要検討
+    if (props.region && props.region !== currentProps.region) {
+      seletedRegion = props.region;
+    }
+
+    //マニフェストが変わったら再初期化
+    if (value.manifest !== currentProps.manifest) {
+      //destory
+      if (viewer) {
+        viewer.destroy();
+      }
+
+      await init();    
+    }
+
+    // regionに変化があったら
+    if (
+        !currentProps.regions ||
+        currentProps.regions.join(",") !== value.regions.join(",")
+      ) {
+        //オーバーレイを作成する
+        createOverlays();
+      }
+
+    //表示切り替え
+    if (value.showAll) {
+      showOverlay();
+    } else {
+      hideOverlay();
+    }
+
+
+    addSelectOverlay();
+
+    updateOverlay(currentProps.page);
+
+    
+    // ページ設定
+    if(props.canvas) {
+      // canvasが指定されていた場合、pageを設定する
+      for (let i = 0; i < canvases.length; i++) {
+        if (canvases[i]["@id"] === props.canvas) {
+          page = i + 1;
+          break;
+        }
+      }
+    } else if(props.page) {
+      page = props.page;
+    }
+
+    if(currentProps.page !== page) {
+      move();
+    }
+
+    currentProps = Object.assign({}, value);
+    currentProps.page = page
   },
   { deep: true, immediate: true }
 );
