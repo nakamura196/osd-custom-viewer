@@ -1,15 +1,26 @@
 <script setup lang="ts">
-import { onMounted, watch } from "vue";
+import { onMounted, watch, computed } from "vue";
 import OpenSeadragon from "openseadragon";
 
 let viewer: any = null;
 let currentProps: any = {};
 let page = 1;
 let canvases: any[] = [];
+
+
+
+const size = computed(() => {
+    return canvases.length
+})
+
+defineExpose({
+    size
+})
+
 let overlays: any = {};
 let seletedRegion: string = "";
 
-const createUuid = () => {
+const createid = () => {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (a) {
     let r = (new Date().getTime() + Math.random() * 16) % 16 | 0,
       v = a == "x" ? r : (r & 0x3) | 0x8;
@@ -17,40 +28,54 @@ const createUuid = () => {
   });
 };
 
-const uuid = createUuid();
-
 const props = withDefaults(
   defineProps<{
+    id?: string;
     height?: number;
     width?: string;
-    manifest?: string;
+    manifest: string;
     page?: number;
-    canvas?: string;
-    backgroundColor?: string;
-    prefixUrl?: string;
+    canvas_id?: string;
+    background_color?: string;
+    prefix_url?: string;
     regions?: any;
-    showAll?: boolean;
-    region?: string;
-    hover?: string;
+    show_all?: boolean;
+    selected_id?: string;
+    hover_id?: string;
+    mode?: string;
+    use_custom_buttons?: boolean
   }>(),
   {
+    id: "",
     height: 600,
     width: "100%",
     manifest: "",
     page: 1,
-    canvas: "",
-    backgroundColor: "black",
-    prefixUrl: "./images/",
+    canvas_id: "",
+    background_color: "black",
+    prefix_url: "./images/",
     regions: [],
-    showAll: false,
-    region: "",
-    hover: "",
+    show_all: false,
+    selected_id: "",
+    hover_id: "",
+    mode: "light",
+    use_custom_buttons: false
   }
 );
 
 const emit = defineEmits<{
   (action: string, pageInfo: any): void;
 }>();
+
+let id = createid();
+if (props.id !== "") {
+  id = props.id;
+}
+
+let background_color = props.background_color;
+if (props.mode === "light") {
+  background_color = "lightgray";
+}
 
 // init
 const init = async () => {
@@ -62,16 +87,33 @@ const init = async () => {
   const data: any = await res.json();
 
   canvases = data.sequences[0].canvases;
+
   for (const canvas_ of canvases) {
     tileSources.push(canvas_.images[0].resource.service["@id"] + "/info.json");
   }
 
-  viewer = OpenSeadragon({
+  if (viewer) {
+    viewer.destroy();
+  }
+
+  const config: any = {
     sequenceMode: true,
-    id: "osd-" + uuid,
-    prefixUrl: props.prefixUrl,
-    tileSources,
-  });
+    id: "osd-" + id,
+    prefix_url: props.prefix_url,
+    tileSources
+  }
+
+  if(props.use_custom_buttons) {
+    config["zoomInButton"] = `osv-${id}-zoom-in`
+    config["zoomOutButton"] = `osv-${id}-zoom-out`
+    config["homeButton"] = `osv-${id}-home-button`
+    config["nextButton"] = `osv-${id}-next`
+    config["previousButton"] = `osv-${id}-previous`
+  }
+
+  viewer = OpenSeadragon(config);
+
+  // viewer.container.dir = "rtl";
 
   // ビューア側のページ遷移
   viewer.addHandler("page", function (event: any) {
@@ -145,22 +187,11 @@ const createOverlays = () => {
       overlays[page].push(overlay);
     }
   }
-
-  // currentRegion = props.regions;
 };
 
 // 外部からのページネーション
 const move = () => {
-  
-  
-
-  /*
-  if (props.page) {
-    page = props.page;
-  }
-  */
-
-  viewer.goToPage(/*page*/ page - 1);
+  viewer.goToPage(page - 1);
 };
 
 const updateOverlay = (page: number) => {
@@ -185,10 +216,9 @@ const updateOverlay = (page: number) => {
             target.classList.add("selected");
 
             seletedRegion = target.id;
-            // currentCanvas + target.id.replace("overlay-", "#xywh=");
 
             emit("updatedSeletecd", {
-              region: seletedRegion,
+              selected_id: seletedRegion,
             });
           }
         },
@@ -202,11 +232,11 @@ const addSelectOverlay = () => {
     for (const overlay of overlays[page]) {
       if (seletedRegion === overlay.id) {
         overlay.className += " selected";
-      } else  {
+      } else {
         overlay.className = overlay.className.split(" selected").join(""); //複数の場合あり
       }
 
-      if (props.hover === overlay.id) {
+      if (props.hover_id === overlay.id) {
         overlay.className += " hover";
       } else {
         overlay.className = overlay.className.replace(" hover", "");
@@ -219,11 +249,6 @@ const showOverlay = () => {
   for (const page in overlays) {
     for (const overlay of overlays[page]) {
       overlay.className = "base highlight";
-      /*
-      if (seletedRegion && seletedRegion === overlay.id) {
-        overlay.className = "base highlight selected";
-      }
-      */
     }
   }
 };
@@ -232,23 +257,17 @@ const hideOverlay = () => {
   for (const page in overlays) {
     for (const overlay of overlays[page]) {
       overlay.className = "base";
-      /*
-      if (seletedRegion && seletedRegion === overlay.id) {
-        overlay.className = "base highlight selected";
-      }
-      */
     }
   }
 };
 
-/*
 // propsが更新されたら
 watch(
   props,
   async (value) => {
     //要検討
-    if (props.region && props.region !== currentProps.region) {
-      seletedRegion = props.region;
+    if (props.selected_id && props.selected_id !== currentProps.region) {
+      seletedRegion = props.selected_id;
     }
 
     //マニフェストが変わったら再初期化
@@ -259,163 +278,59 @@ watch(
       }
 
       await init();
-
-      createOverlays();
-
-      if (value.showAll) {
-        showOverlay();
-      } else {
-        hideOverlay();
-      }
-
-      addSelectOverlay();
-
-      if (currentProps.page !== value.page || currentProps.canvas !== value.canvas) {
-        move();
-      } else {
-        updateOverlay(currentProps.page);
-      }
-    } else {
-      // あとで整理
-      // regionに変化があったら
-      if (
-        !currentProps.regions ||
-        currentProps.regions.join(",") !== value.regions.join(",")
-      ) {
-        //オーバーレイを作成する
-        createOverlays();
-
-        if (value.showAll) {
-          showOverlay();
-        } else {
-          hideOverlay();
-        }
-
-        addSelectOverlay();
-        updateOverlay(currentProps.page);
-
-        if (currentProps.page !== value.page || currentProps.canvas !== value.canvas) {
-          move();
-        }
-      } else {
-
-        console.log("ends")
-
-        console.log(1, JSON.stringify(currentProps))
-
-        console.log(2, JSON.stringify(value))
-
-        // visibleに変化があったら
-        if (currentProps.showAll !== value.showAll) {
-          if (value.showAll) {
-            showOverlay();
-          } else {
-            hideOverlay();
-          }
-
-          currentProps.showAll = value.showAll;
-
-          //ページが移動しない場合, または regionに変化があった場合
-          if (currentProps.page === value.page) {
-            updateOverlay(currentProps.page);
-          }
-        }
-
-        // regionに更新があれば //要検討
-        if (props.region && props.region !== currentProps.region) {
-          addSelectOverlay();
-          updateOverlay(currentProps.page);
-        }
-
-        if (currentProps.page !== value.page || currentProps.canvas !== value.canvas) {
-          move();
-        }
-      }
-    }
-
-    if(currentProps.hover !== value.hover) {
-      // hover = value.hover;
-      addSelectOverlay();
-      updateOverlay(currentProps.page);
-    }
-
-    currentProps = Object.assign({}, value);
-  },
-  { deep: true, immediate: true }
-);
-*/
-
-// propsが更新されたら
-watch(
-  props,
-  async (value) => {
-
-    //要検討
-    if (props.region && props.region !== currentProps.region) {
-      seletedRegion = props.region;
-    }
-
-    //マニフェストが変わったら再初期化
-    if (value.manifest !== currentProps.manifest) {
-      //destory
-      if (viewer) {
-        viewer.destroy();
-      }
-
-      await init();    
     }
 
     // regionに変化があったら
     if (
-        !currentProps.regions ||
-        currentProps.regions.join(",") !== value.regions.join(",")
-      ) {
-        //オーバーレイを作成する
-        createOverlays();
-      }
+      !currentProps.regions ||
+      currentProps.regions.join(",") !== value.regions.join(",")
+    ) {
+      //オーバーレイを作成する
+      createOverlays();
+    }
 
     //表示切り替え
-    if (value.showAll) {
+    if (value.show_all) {
       showOverlay();
     } else {
       hideOverlay();
     }
 
-
     addSelectOverlay();
 
     updateOverlay(currentProps.page);
 
-    
     // ページ設定
-    if(props.canvas) {
+    if (props.canvas_id) {
       // canvasが指定されていた場合、pageを設定する
       for (let i = 0; i < canvases.length; i++) {
-        if (canvases[i]["@id"] === props.canvas) {
+        if (canvases[i]["@id"] === props.canvas_id) {
           page = i + 1;
           break;
         }
       }
-    } else if(props.page) {
+    } else if (props.page) {
       page = props.page;
     }
 
-    if(currentProps.page !== page) {
+    if (currentProps.page !== page) {
       move();
     }
 
     currentProps = Object.assign({}, value);
-    currentProps.page = page
+    currentProps.page = page;
   },
   { deep: true, immediate: true }
 );
 </script>
 
 <template>
-  <div
-    :id="`osd-${uuid}`"
-    :style="`height: ${height}px; width: ${width}; background-color: ${backgroundColor};`"
-  ></div>
+  <div :style="`background-color: ${background_color};`">
+    <div
+      :id="`osd-${id}`"
+      :style="`height: ${height}px; width: ${width};`"
+    ></div>
+  </div>
 </template>
 <style scoped>
 :deep(.highlight) {

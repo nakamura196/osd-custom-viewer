@@ -8,7 +8,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, "lib/main.ts"),
-      name: "OsdCustomViewer",
+      name: "osd-custom-viewer",
       // the proper extensions will be added
       fileName: "osd-custom-viewer",
     },

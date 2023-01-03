@@ -1,6 +1,6 @@
 {
   "name": "@nakamura196/osd-custom-viewer",
-  "version": "2.23.0",
+  "version": "2.22.0",
   "description": "This is a custom openseadragon viewer.",
   "keywords": [
     "iiif",
@@ -34,17 +34,28 @@
     "dev": "vite",
     "build": "vite build && vue-tsc --emitDeclarationOnly",
     "preview": "vite preview",
-    "pack": "npm run build && npm pack",
-    "deploy": "npm run build && npm version minor && npm publish --access=public"
+    "deploy": "npm run build && npm version minor && npm publish --access=public",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook",
+    "pack": "npm run build && npm pack"
   },
   "dependencies": {
     "openseadragon": "^4.0.0",
     "vue": "^3.2.37"
   },
   "devDependencies": {
+    "@babel/core": "^7.20.7",
+    "@storybook/addon-actions": "^6.5.15",
+    "@storybook/addon-essentials": "^6.5.15",
+    "@storybook/addon-interactions": "^6.5.15",
+    "@storybook/addon-links": "^6.5.15",
+    "@storybook/builder-vite": "^0.2.6",
+    "@storybook/testing-library": "^0.0.13",
+    "@storybook/vue3": "^6.5.15",
     "@types/node": "^18.11.17",
     "@types/openseadragon": "^3.0.4",
     "@vitejs/plugin-vue": "^3.1.0",
+    "babel-loader": "^8.3.0",
     "typescript": "^4.6.4",
     "vite": "^3.1.0",
     "vue-router": "^4.1.6",

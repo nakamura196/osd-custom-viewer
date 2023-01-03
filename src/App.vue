@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import OsdCustomViewer from "../lib/OsdCustomViewer.vue";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { useRoute } from "vue-router";
 const page = ref<number>(1);
 const manifest = ref<string>("");
@@ -34,7 +34,7 @@ const move2 = (value: number) => {
   page.value += value;
 
   // canvasを空にする。要検討
-  canvas.value = ""
+  canvas.value = "";
 };
 
 const regions = ref<string[]>([]);
@@ -114,7 +114,7 @@ const region2 = () => {
 
 const hover2 = () => {
   hover.value =
-  "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=544,620,1452,2000";
+    "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=544,620,1452,2000";
 };
 </script>
 
@@ -196,7 +196,24 @@ const hover2 = () => {
     <button @click="move2(-1)" style="margin: 4px">-</button>
   </div>
 
+  <div style="margin-bottom: 8px">
+    <h3>カスタムバー</h3>
+    <button id="osv-demo-zoom-in" style="margin: 4px">zoom-in</button>
+    <button id="osv-demo-zoom-out" style="margin: 4px">zoom-out</button>
+    <button id="osv-demo-home-button" style="margin: 4px">home-button</button>
+    <button id="osv-demo-next" style="margin: 4px">next</button>
+    <button id="osv-demo-previous" style="margin: 4px">previous</button>
+
+    <template v-if="$refs.ocv && $refs.ocv.size > 0">
+      <span style="margin: 4px">
+        {{ page }} / {{ $refs.ocv.size }}
+      </span>
+    </template>
+  </div>
+
   <OsdCustomViewer
+    ref="ocv"
+    uuid="demo"
     v-if="manifest"
     :canvas="canvas"
     @updated="updatePage"
@@ -207,6 +224,7 @@ const hover2 = () => {
     :showAll="isShowAll"
     :region="region"
     :hover="hover"
+    :isCustomBar="true"
   />
 
   {{ hover }}
