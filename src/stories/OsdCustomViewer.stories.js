@@ -2,7 +2,7 @@ import MyMode from "../../lib/OsdCustomViewer.vue";
 
 // More on default export: https://storybook.js.org/docs/vue/writing-stories/introduction#default-export
 export default {
-  title: "Example",
+  title: "OsdCustomViewer",
   component: MyMode,
   // More on argTypes: https://storybook.js.org/docs/vue/api/argtypes
   argTypes: {
@@ -27,9 +27,9 @@ const Template = (args) => ({
   template: '<my-Mode v-bind="args" />',
 });
 
-export const Primary = Template.bind({});
+export const Basic = Template.bind({});
 // More on args: https://storybook.js.org/docs/vue/writing-stories/args
-Primary.args = {
+Basic.args = {
   manifest: "https://www.dl.ndl.go.jp/api/iiif/2567061/manifest.json",
   regions: [
     "https://dl.ndl.go.jp/api/iiif/2567061/canvas/68#xywh=50,50,300,300",
@@ -40,4 +40,15 @@ Primary.args = {
   ],
   page: 69,
   show_all: true
+};
+
+export const Minimum = Template.bind({});
+Minimum.args = {
+  manifest: "https://www.dl.ndl.go.jp/api/iiif/3437686/manifest.json"
+};
+
+export const Dark = Template.bind({});
+Dark.args = {
+  manifest: "https://www.dl.ndl.go.jp/api/iiif/3437686/manifest.json",
+  mode: "dark"
 };
