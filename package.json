@@ -1,6 +1,6 @@
 {
   "name": "@nakamura196/osd-custom-viewer",
-  "version": "2.22.0",
+  "version": "2.23.0",
   "description": "This is a custom openseadragon viewer.",
   "keywords": [
     "iiif",
