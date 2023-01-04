@@ -7,14 +7,21 @@ let currentProps: any = {};
 let page = 1;
 let canvases: any[] = [];
 
-
+const canvases_: any = computed(() => {
+  const items = []
+  for(const canvas of canvases) {
+    items.push(canvas["@id"])
+  }
+  return items
+})
 
 const size = computed(() => {
-    return canvases.length
+  return canvases.length
 })
 
 defineExpose({
-    size
+    size,
+    canvases: canvases_
 })
 
 let overlays: any = {};
@@ -99,9 +106,9 @@ const init = async () => {
   const config: any = {
     sequenceMode: true,
     id: "osd-" + id,
-    prefix_url: props.prefix_url,
+    prefixUrl: props.prefix_url,
     tileSources
-  }
+  }  
 
   if(props.use_custom_buttons) {
     config["zoomInButton"] = `osv-${id}-zoom-in`
@@ -121,7 +128,7 @@ const init = async () => {
 
     emit("updated", {
       page: event.page + 1,
-      canvas: canvases[event.page]["@id"],
+      canvas_id: canvases[event.page]["@id"],
     });
   });
 
@@ -265,6 +272,7 @@ const hideOverlay = () => {
 watch(
   props,
   async (value) => {
+
     //要検討
     if (props.selected_id && props.selected_id !== currentProps.region) {
       seletedRegion = props.selected_id;
@@ -313,6 +321,7 @@ watch(
       page = props.page;
     }
 
+    //ページが異なれば移動する
     if (currentProps.page !== page) {
       move();
     }

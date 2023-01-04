@@ -4,20 +4,22 @@ import { onMounted, ref, computed } from "vue";
 import { useRoute } from "vue-router";
 const page = ref<number>(1);
 const manifest = ref<string>("");
-const canvas = ref<string>("");
+const canvas_id = ref<string>("");
 const route = useRoute();
-const region = ref<string>("");
+const selected_id = ref<string>("");
 // const viewer = ref<any>(null);
-const hover = ref<string>("");
+const hover_id = ref<string>("");
+
 
 const updatePage = (value: any) => {
   page.value = value.page;
-  canvas.value = value.canvas;
+  canvas_id.value = value.canvas_id;
 };
+/*
+*/
 
 const updatedSeletecd = (value: any) => {
-  // console.log(value.region)
-  region.value = value.region;
+  selected_id.value = value.selected_id;
 };
 
 onMounted(() => {
@@ -30,24 +32,23 @@ onMounted(() => {
   ex02();
 });
 
+const ocv = ref<any>(null);
+
 const move2 = (value: number) => {
   page.value += value;
-
-  // canvasを空にする。要検討
-  canvas.value = "";
+  canvas_id.value = ocv.value.canvases[page.value - 1];
 };
 
 const regions = ref<string[]>([]);
 
 const ex01 = () => {
-  canvas.value = "";
+  canvas_id.value = "";
   regions.value = [];
   manifest.value = "https://www.dl.ndl.go.jp/api/iiif/3437686/manifest.json";
-  page.value = 1;
 };
 
 const ex02 = () => {
-  canvas.value = "";
+  canvas_id.value = "";
   regions.value = [
     "https://dl.ndl.go.jp/api/iiif/2567061/canvas/68#xywh=50,50,300,300",
     "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=2028,644,1452,1992",
@@ -56,11 +57,11 @@ const ex02 = () => {
     "https://dl.ndl.go.jp/api/iiif/2567061/canvas/91#xywh=470,686,1548,1991",
   ];
   manifest.value = "https://www.dl.ndl.go.jp/api/iiif/2567061/manifest.json";
-  page.value = 69;
+  canvas_id.value = "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69"
 };
 
 const ex03 = () => {
-  canvas.value = "";
+  canvas_id.value = "";
   regions.value = [
     "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=2028,644,1452,1992",
     "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=544,620,1452,2000",
@@ -68,18 +69,19 @@ const ex03 = () => {
     // "https://dl.ndl.go.jp/api/iiif/2567061/canvas/91#xywh=470,686,1548,1991"
   ];
   manifest.value = "https://www.dl.ndl.go.jp/api/iiif/2567061/manifest.json";
-  page.value = 91;
+  // page.value = 91;
+  canvas_id.value = "https://dl.ndl.go.jp/api/iiif/2567061/canvas/91"
 };
 
 const ex04 = () => {
   regions.value = [];
-  canvas.value = "https://dl.ndl.go.jp/api/iiif/3437686/canvas/6";
+  canvas_id.value = "https://dl.ndl.go.jp/api/iiif/3437686/canvas/6";
   manifest.value = "https://www.dl.ndl.go.jp/api/iiif/3437686/manifest.json";
 };
 
 const ex05 = () => {
   regions.value = [];
-  canvas.value = "https://dl.ndl.go.jp/api/iiif/3437686/canvas/7";
+  canvas_id.value = "https://dl.ndl.go.jp/api/iiif/3437686/canvas/7";
   manifest.value = "https://www.dl.ndl.go.jp/api/iiif/3437686/manifest.json";
 };
 
@@ -94,26 +96,26 @@ const hideAll = () => {
 };
 
 const region1 = () => {
-  region.value =
+  selected_id.value =
     "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=2028,644,1452,1992";
 };
 
 const hover1 = () => {
-  hover.value =
+  hover_id.value =
     "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=2028,644,1452,1992";
 };
 
 const mouseLeaveAction = () => {
-  hover.value = "";
+  hover_id.value = "";
 };
 
 const region2 = () => {
-  region.value =
+  selected_id.value =
     "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=544,620,1452,2000";
 };
 
 const hover2 = () => {
-  hover.value =
+  hover_id.value =
     "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=544,620,1452,2000";
 };
 </script>
@@ -154,7 +156,7 @@ const hover2 = () => {
     <button
       style="margin: 4px"
       :style="
-        region ===
+        selected_id ===
         'https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=2028,644,1452,1992'
           ? 'color: red;'
           : ''
@@ -169,7 +171,7 @@ const hover2 = () => {
     <button
       style="margin: 4px"
       :style="
-        region ===
+        selected_id ===
         'https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=544,620,1452,2000'
           ? 'color: red;'
           : ''
@@ -186,9 +188,9 @@ const hover2 = () => {
 
     <p>Page: {{ page }}</p>
 
-    <p>Canvas: {{ canvas }}</p>
+    <p>canvas_id: {{ canvas_id }}</p>
 
-    <p>region: {{ region }}</p>
+    <p>selected_id: {{ selected_id }}</p>
 
     <h4>コンポーネントの外からページネーション</h4>
 
@@ -213,21 +215,23 @@ const hover2 = () => {
 
   <OsdCustomViewer
     ref="ocv"
-    uuid="demo"
+    id="demo"
     v-if="manifest"
-    :canvas="canvas"
+    :canvas_id="canvas_id"
     @updated="updatePage"
     @updatedSeletecd="updatedSeletecd"
     :manifest="manifest"
-    :page="page"
     :regions="regions"
-    :showAll="isShowAll"
-    :region="region"
-    :hover="hover"
-    :isCustomBar="true"
+    :show_all="isShowAll"
+    :selected_id="selected_id"
+    :hover_id="hover_id"
+    :use_custom_buttons="true"
   />
 
-  {{ hover }}
+  <!-- 
+    :page="page" -->
+
+  {{ hover_id }}
 
   <div>
     <ul>
