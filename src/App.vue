@@ -9,7 +9,8 @@ const route = useRoute();
 const selected_id = ref<string>("");
 // const viewer = ref<any>(null);
 const hover_id = ref<string>("");
-
+const fit_id = ref<string>("");
+ 
 
 const updatePage = (value: any) => {
   page.value = value.page;
@@ -118,6 +119,14 @@ const hover2 = () => {
   hover_id.value =
     "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=544,620,1452,2000";
 };
+
+const fit1 = () => {
+  fit_id.value = "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=544,620,1452,2000";
+}
+
+const fit2 = () => {
+  fit_id.value = "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=2028,644,1452,1992";
+}
 </script>
 
 <template>
@@ -165,7 +174,7 @@ const hover2 = () => {
       v-on:mouseover="hover1"
       v-on:mouseleave="mouseLeaveAction"
     >
-      region1
+      region1を選択（ホバーを含む）
     </button>
 
     <button
@@ -179,7 +188,21 @@ const hover2 = () => {
       @click="region2"
       @hover="hover2"
     >
-      region2
+      region2を選択（ホバーを含む）
+    </button>
+
+    <button
+      style="margin: 4px"
+      @click="fit1()"
+    >
+      region1にフィット
+    </button>
+
+    <button
+      style="margin: 4px"
+      @click="fit2()"
+    >
+      region2にフィット
     </button>
   </div>
 
@@ -224,6 +247,7 @@ const hover2 = () => {
     :regions="regions"
     :show_all="isShowAll"
     :selected_id="selected_id"
+    :fit_id="fit_id"
     :hover_id="hover_id"
     :use_custom_buttons="true"
   />

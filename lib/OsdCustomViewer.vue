@@ -7,22 +7,26 @@ let currentProps: any = {};
 let page = 1;
 let canvases: any[] = [];
 
+const debug = false
+
+const memberMap: any = {}
+
 const canvases_: any = computed(() => {
-  const items = []
-  for(const canvas of canvases) {
-    items.push(canvas["@id"])
+  const items = [];
+  for (const canvas of canvases) {
+    items.push(canvas["@id"]);
   }
-  return items
-})
+  return items;
+});
 
 const size = computed(() => {
-  return canvases.length
-})
+  return canvases.length;
+});
 
 defineExpose({
-    size,
-    canvases: canvases_
-})
+  size,
+  canvases: canvases_,
+});
 
 let overlays: any = {};
 let seletedRegion: string = "";
@@ -49,8 +53,9 @@ const props = withDefaults(
     show_all?: boolean;
     selected_id?: string;
     hover_id?: string;
+    fit_id?: string;
     mode?: string;
-    use_custom_buttons?: boolean
+    use_custom_buttons?: boolean;
   }>(),
   {
     id: "",
@@ -59,63 +64,73 @@ const props = withDefaults(
     manifest: "",
     page: 1,
     canvas_id: "",
-    background_color: "black",
+    background_color: "darkgray",
     prefix_url: "./images/",
     regions: [],
     show_all: false,
     selected_id: "",
     hover_id: "",
-    mode: "light",
-    use_custom_buttons: false
+    fit_id: "",
+    mode: "",
+    use_custom_buttons: false,
   }
 );
 
-const emit = defineEmits<{
-  (action: string, pageInfo: any): void;
-}>();
+const emit =
+  defineEmits<{
+    (action: string, pageInfo: any): void;
+  }>();
 
-let id = createid();
+let id = ""; // = createid();
 if (props.id !== "") {
   id = props.id;
+} else {
+  id = createid();
 }
 
 let background_color = props.background_color;
 if (props.mode === "light") {
   background_color = "lightgray";
+} else if (props.mode === "dark") {
+  background_color = "darkgray";
 }
 
 // init
 const init = async () => {
   // const manifest = props.manifest;
 
-  const tileSources: string[] = [];
+  if (viewer) {
+    viewer.destroy();
+  }
+
+  if(debug) console.log("download start")
 
   const res = await fetch(props.manifest);
   const data: any = await res.json();
 
+  if(debug) console.log("download end")
+
   canvases = data.sequences[0].canvases;
+
+  const tileSources: string[] = [];
 
   for (const canvas_ of canvases) {
     tileSources.push(canvas_.images[0].resource.service["@id"] + "/info.json");
   }
 
-  if (viewer) {
-    viewer.destroy();
-  }
-
   const config: any = {
     sequenceMode: true,
     id: "osd-" + id,
-    prefixUrl: props.prefix_url,
-    tileSources
-  }  
+    // prefixUrl: props.prefix_url,
+    tileSources,
+  };
 
-  if(props.use_custom_buttons) {
-    config["zoomInButton"] = `osv-${id}-zoom-in`
-    config["zoomOutButton"] = `osv-${id}-zoom-out`
-    config["homeButton"] = `osv-${id}-home-button`
-    config["nextButton"] = `osv-${id}-next`
-    config["previousButton"] = `osv-${id}-previous`
+  if (props.use_custom_buttons) {
+    config["zoomInButton"] = `osv-${id}-zoom-in`;
+    config["zoomOutButton"] = `osv-${id}-zoom-out`;
+    config["homeButton"] = `osv-${id}-home-button`;
+    config["nextButton"] = `osv-${id}-next`;
+    config["previousButton"] = `osv-${id}-previous`;
   }
 
   viewer = OpenSeadragon(config);
@@ -192,6 +207,8 @@ const createOverlays = () => {
       };
 
       overlays[page].push(overlay);
+
+      memberMap[id] = new OpenSeadragon.Rect(x, y, width, height)
     }
   }
 };
@@ -215,12 +232,12 @@ const updateOverlay = (page: number) => {
             var target: any = document.getElementById(id);
 
             // すべての要素からselectedを削除
-            const e2 = document.getElementsByClassName("selected");
+            const e2 = document.getElementsByClassName("osdc-selected");
             for (let i = 0; i < e2.length; i++) {
-              e2[i].classList.remove("selected");
+              e2[i].classList.remove("osdc-selected");
             }
 
-            target.classList.add("selected");
+            target.classList.add("osdc-selected");
 
             seletedRegion = target.id;
 
@@ -238,15 +255,15 @@ const addSelectOverlay = () => {
   for (const page in overlays) {
     for (const overlay of overlays[page]) {
       if (seletedRegion === overlay.id) {
-        overlay.className += " selected";
+        overlay.className += " osdc-selected";
       } else {
-        overlay.className = overlay.className.split(" selected").join(""); //複数の場合あり
+        overlay.className = overlay.className.split(" osdc-selected").join(""); //複数の場合あり
       }
 
       if (props.hover_id === overlay.id) {
-        overlay.className += " hover";
+        overlay.className += " osdc-hover";
       } else {
-        overlay.className = overlay.className.replace(" hover", "");
+        overlay.className = overlay.className.replace(" osdc-hover", "");
       }
     }
   }
@@ -255,7 +272,7 @@ const addSelectOverlay = () => {
 const showOverlay = () => {
   for (const page in overlays) {
     for (const overlay of overlays[page]) {
-      overlay.className = "base highlight";
+      overlay.className = "osdc-base osdc-highlight";
     }
   }
 };
@@ -263,7 +280,7 @@ const showOverlay = () => {
 const hideOverlay = () => {
   for (const page in overlays) {
     for (const overlay of overlays[page]) {
-      overlay.className = "base";
+      overlay.className = "osdc-base";
     }
   }
 };
@@ -272,6 +289,7 @@ const hideOverlay = () => {
 watch(
   props,
   async (value) => {
+    if(debug) console.log("start")
 
     //要検討
     if (props.selected_id && props.selected_id !== currentProps.region) {
@@ -328,6 +346,12 @@ watch(
 
     currentProps = Object.assign({}, value);
     currentProps.page = page;
+
+    if(debug) console.log("end")
+
+    if(props.fit_id) {
+      viewer.viewport.fitBounds(memberMap[props.fit_id]);
+    }
   },
   { deep: true, immediate: true }
 );
@@ -337,24 +361,24 @@ watch(
   <div :style="`background-color: ${background_color};`">
     <div
       :id="`osd-${id}`"
-      :style="`height: ${height}px; width: ${width};`"
-    ></div>
+      :style="`height: ${height}px; width: ${width};`">
+  </div>
   </div>
 </template>
 <style scoped>
-:deep(.highlight) {
+:deep(.osdc-highlight) {
   outline: solid #03a9f4;
 }
 
-:deep(.selected) {
+:deep(.osdc-selected) {
   outline: solid #ffeb3b !important;
 }
 
-:deep(.hover) {
+:deep(.osdc-hover) {
   outline: solid #9c27b0;
 }
 
-:deep(.base:hover, .base:focus) {
+:deep(.osdc-base:hover, .osdc-base:focus) {
   outline: solid #9c27b0;
 }
 </style>
