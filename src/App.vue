@@ -10,6 +10,7 @@ const selected_id = ref<string>("");
 // const viewer = ref<any>(null);
 const hover_id = ref<string>("");
 const fit_id = ref<string>("");
+const default_region = ref<string>("");
  
 
 const updatePage = (value: any) => {
@@ -127,6 +128,10 @@ const fit1 = () => {
 const fit2 = () => {
   fit_id.value = "https://dl.ndl.go.jp/api/iiif/2567061/canvas/69#xywh=2028,644,1452,1992";
 }
+
+const setDefaultRegion = () => {
+  default_region.value = "2028,644,1452,1992"
+}
 </script>
 
 <template>
@@ -204,6 +209,20 @@ const fit2 = () => {
     >
       region2にフィット
     </button>
+
+    <button
+      style="margin: 4px"
+      @click="setDefaultRegion()"
+    >
+      default_regionを設定する
+    </button>
+
+    <button
+      style="margin: 4px"
+      @click="default_region = ''"
+    >
+      default_regionを外す
+    </button>
   </div>
 
   <div style="margin-bottom: 8px">
@@ -250,6 +269,7 @@ const fit2 = () => {
     :fit_id="fit_id"
     :hover_id="hover_id"
     :use_custom_buttons="true"
+    :default_region="default_region"
   />
 
   <!-- 

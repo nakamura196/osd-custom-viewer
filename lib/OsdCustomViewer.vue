@@ -56,6 +56,7 @@ const props = withDefaults(
     fit_id?: string;
     mode?: string;
     use_custom_buttons?: boolean;
+    default_region?: string;
   }>(),
   {
     id: "",
@@ -73,6 +74,7 @@ const props = withDefaults(
     fit_id: "",
     mode: "",
     use_custom_buttons: false,
+    default_region: "",
   }
 );
 
@@ -147,7 +149,23 @@ const init = async () => {
     });
   });
 
-  // currentProps.manifest = manifest;
+  if(props.default_region) {
+    viewer.addHandler('open', function() {
+      var tiledImage = viewer.world.getItemAt(0);
+
+      const spl = props.default_region.split(",");
+      const x = Number(spl[0]);
+      const y = Number(spl[1]);
+      const w = Number(spl[2]);
+      const h = Number(spl[3]);
+      
+      var imageRect = new OpenSeadragon.Rect(x, y, w, h);
+      
+      var viewportRect = tiledImage.imageToViewportRectangle(imageRect);
+      viewer.viewport.fitBounds(viewportRect, true);
+    });
+  } 
+  
 };
 
 //オーバーレイを作成する
